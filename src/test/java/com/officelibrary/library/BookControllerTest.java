@@ -50,7 +50,7 @@ class BookControllerTest {
         Mockito.when(libraryService.getBooks()).thenReturn(library);
 
         mockMvc.perform(MockMvcRequestBuilders
-            .get("/library/books")
+            .get("/libraryAPI/books")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(4)))
@@ -64,7 +64,7 @@ class BookControllerTest {
         Mockito.when(libraryService.getBookByTitle(bookTitle)).thenReturn(Optional.of(library.get(bookId)));
 
         mockMvc.perform(MockMvcRequestBuilders
-            .get("/library/book")
+            .get("/libraryAPI/booksWithParam")
             .queryParam("title", bookTitle)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -79,7 +79,7 @@ class BookControllerTest {
         Mockito.when(libraryService.getBookByTitle(bookTitle)).thenReturn(Optional.empty());
 
         mockMvc.perform(MockMvcRequestBuilders
-            .get("/library/book")
+            .get("/libraryAPI/book")
             .queryParam("title", bookTitle)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
@@ -91,7 +91,7 @@ class BookControllerTest {
         Mockito.when(libraryService.addBook(bookToAdd)).thenReturn(Collections.singletonList(bookToAdd));
 
         mockMvc.perform(MockMvcRequestBuilders
-            .post("/library/add-book")
+            .post("/libraryAPI/books")
             .content(mapToJson(bookToAdd))
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().is2xxSuccessful());
@@ -103,7 +103,7 @@ class BookControllerTest {
         Mockito.when(libraryService.addBook(bookToAdd)).thenThrow(new RuntimeException());
 
         mockMvc.perform(MockMvcRequestBuilders
-            .post("/library/add-book")
+            .post("/libraryAPI/books")
             .content(mapToJson(bookToAdd))
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isInternalServerError());
