@@ -16,7 +16,8 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.officelibrary.library.exposure.controller.BookController;
 import com.officelibrary.library.exposure.model.Book;
-import com.officelibrary.library.exposure.service.LibraryService;
+import com.officelibrary.library.exposure.model.Category;
+import com.officelibrary.library.exposure.service.BookService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -36,22 +37,22 @@ class BookControllerTest {
 
     // @Mock
     @MockBean
-    LibraryService libraryService;
+    BookService bookService;
 
     private static final List<Book> library = Arrays.asList(
-        new Book("Ulysses", "James Joyce", "Ulysses chronicles"),
-        new Book("Don Quixote", "Miguel de Cervantes", "Retired country gentleman in his fifties"),
-        new Book("One Hundred Years of Solitude", "Gabriel Garcia Marquez", "Widely beloved and acclaimed novel"),
-        new Book("The Great Gatsby", "F. Scott Fitzgerald", "An era that Fitzgerald himself dubbed the.")
+        new Book("Ulysses", "Ulysses chronicles", null, new Category("Myths")),
+        new Book("Don Quixote", "Retired country gentleman in his fifties", null, new Category("Legends")),
+        new Book("One Hundred Years of Solitude", "Widely beloved and acclaimed novel", null, new Category("Magic Realism")),
+        new Book("The Great Gatsby", "An era that Fitzgerald himself dubbed the.", null, new Category("Thriller"))
     );
 
     @Test
     void getAllBooks() throws Exception {
-        Mockito.when(libraryService.getBooks()).thenReturn(library);
+        Mockito.when(bookService.getBooks()).thenReturn(library);
 
         mockMvc.perform(MockMvcRequestBuilders
-            .get("/libraryAPI/books")
-            .contentType(MediaType.APPLICATION_JSON))
+                .get("/libraryAPI/books")
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(4)))
             .andExpect(jsonPath("$[2].title", is("One Hundred Years of Solitude")));
@@ -61,51 +62,50 @@ class BookControllerTest {
     void getBookByTitleParam() throws Exception {
         int bookId = 3;
         String bookTitle = "The Great Gatsby";
-        Mockito.when(libraryService.getBookByTitle(bookTitle)).thenReturn(Optional.of(library.get(bookId)));
+        Mockito.when(bookService.getBookByTitle(bookTitle)).thenReturn(Optional.of(List.of(library.get(bookId))));
 
         mockMvc.perform(MockMvcRequestBuilders
-            .get("/libraryAPI/booksWithParam")
-            .queryParam("title", bookTitle)
-            .contentType(MediaType.APPLICATION_JSON))
+                .get("/libraryAPI/booksWithParam")
+                .queryParam("title", bookTitle)
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.title", is(bookTitle)))
-            .andExpect(jsonPath("$.author", is("F. Scott Fitzgerald")))
-            .andExpect(jsonPath("$.description", is("An era that Fitzgerald himself dubbed the.")));
+            .andExpect(jsonPath("$[0].title", is(bookTitle)))
+            .andExpect(jsonPath("$[0].description", is("An era that Fitzgerald himself dubbed the.")));
     }
 
     @Test
     void getBookByTitleNotFound() throws Exception {
         String bookTitle = "The Great Gatsby";
-        Mockito.when(libraryService.getBookByTitle(bookTitle)).thenReturn(Optional.empty());
+        Mockito.when(bookService.getBookByTitle(bookTitle)).thenReturn(Optional.empty());
 
         mockMvc.perform(MockMvcRequestBuilders
-            .get("/libraryAPI/book")
-            .queryParam("title", bookTitle)
-            .contentType(MediaType.APPLICATION_JSON))
+                .get("/libraryAPI/book")
+                .queryParam("title", bookTitle)
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
     }
 
     @Test
     void addABook() throws Exception {
         Book bookToAdd = library.get(0);
-        Mockito.when(libraryService.addBook(bookToAdd)).thenReturn(Collections.singletonList(bookToAdd));
+        Mockito.when(bookService.addBook(bookToAdd)).thenReturn(bookToAdd);
 
         mockMvc.perform(MockMvcRequestBuilders
-            .post("/libraryAPI/books")
-            .content(mapToJson(bookToAdd))
-            .contentType(MediaType.APPLICATION_JSON))
+                .post("/libraryAPI/books")
+                .content(mapToJson(bookToAdd))
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().is2xxSuccessful());
     }
 
     @Test
     void addABookBadRequest() throws Exception {
         Book bookToAdd = library.get(0);
-        Mockito.when(libraryService.addBook(bookToAdd)).thenThrow(new RuntimeException());
+        Mockito.when(bookService.addBook(bookToAdd)).thenThrow(new RuntimeException());
 
         mockMvc.perform(MockMvcRequestBuilders
-            .post("/libraryAPI/books")
-            .content(mapToJson(bookToAdd))
-            .contentType(MediaType.APPLICATION_JSON))
+                .post("/libraryAPI/books")
+                .content(mapToJson(bookToAdd))
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isInternalServerError());
     }
 
