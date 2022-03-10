@@ -1,11 +1,6 @@
 package com.officelibrary;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @DataMongoTest
 @ExtendWith(SpringExtension.class)
-public class BookRepositoryTest {
+public class BookRepositoryTestAssertJ {
 
     private static final List<Book> library = Arrays.asList(
         new Book("Ulysses", "Ulysses chronicles", List.of(new Author("James", "Joyce")), new Category("Myths")),
@@ -50,19 +45,23 @@ public class BookRepositoryTest {
 
     @Test
     public void should_returnNotEmptyList_whenTryingToGetDataFromDatabase() {
-        assertNotNull(bookRepository.findAll());
+        assertThat(bookRepository.findAll())
+            .isNotEmpty();
     }
 
     @Test
     void should_returnBookWithExpectedTitleAndDescription_whenBookIsFoundInDatabase() {
+        //given
+        //when
         List<Book> books = bookRepository.findAllByTitle("Ulysses");
-        assertTrue(books.size() == 1);
+        assertThat(books).isNotEmpty();
         Book book = books.get(0);
-        assertAll(
-            "Assert Ulysses is present",
-            () -> assertEquals("Ulysses", book.getTitle()),
-            () -> assertEquals(library.get(0).getDescription(), book.getDescription(), "Descriptions must match")
-        );
+
+        //then
+        assertThat(book.getTitle()).isEqualTo("Ulysses");
+        assertThat(book.getDescription())
+            .describedAs("Descriptions must match")
+            .isEqualTo(library.get(0).getDescription());
     }
 
     @Test
@@ -72,22 +71,24 @@ public class BookRepositoryTest {
         bookRepository.saveAll(library);
 
         //then
-        assertEquals(bookRepository.findAll().size(), 8);
+        assertThat(bookRepository.findAll())
+            .hasSize(8);
     }
 
     @Test
     void should_deleteGivenBook_whenBookIsFoundInDatabase() {
         //given
         Book bookToDelete = bookRepository.findAllByTitle("Ulysses").get(0);
-        assertNull(bookToDelete);
+        assertThat(bookToDelete).isNotNull();
 
         //when
         bookRepository.delete(bookToDelete);
 
         //then
-        List<Book> books = bookRepository.findAll();
-        assertEquals(3, books.size());
-        assertFalse(books.stream().anyMatch(b -> b.equals(bookToDelete)));
+        assertThat(bookRepository.findAll())
+            .describedAs("Assert Ulysses book has been deleted")
+            .hasSize(3)
+            .doesNotContain(bookToDelete);
     }
 
 }
