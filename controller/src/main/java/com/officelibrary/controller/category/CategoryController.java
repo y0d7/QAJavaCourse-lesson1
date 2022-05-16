@@ -1,7 +1,6 @@
 package com.officelibrary.controller.category;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.officelibrary.controller.category.model.CategoryDto;
 import com.officelibrary.controller.category.model.PostCategoryDto;
@@ -30,7 +29,7 @@ public class CategoryController {
         return categoryService.getAll()
             .stream()
             .map(CategoryDto::new)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @GetMapping("{id}")
