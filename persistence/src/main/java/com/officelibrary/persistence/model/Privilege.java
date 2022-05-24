@@ -30,5 +30,9 @@ public enum Privilege {
     ADD_USER,
     UPDATE_USER,
     DELETE_USER,
-    DELETE_ALL_USERS,
+    DELETE_ALL_USERS;
+
+    public String getName() {
+        return name();
+    }
 }

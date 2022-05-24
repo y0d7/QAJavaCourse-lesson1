@@ -6,8 +6,8 @@ import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,18 +19,18 @@ import com.officelibrary.controller.book.BookController;
 import com.officelibrary.controller.book.model.PostBookDto;
 import com.officelibrary.controller.category.CategoryController;
 import com.officelibrary.controller.category.model.PostCategoryDto;
-import com.officelibrary.persistence.model.Book;
-import com.officelibrary.persistence.model.Category;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.util.Base64Utils;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(value = {
@@ -43,26 +43,21 @@ class ControllerIntegrationTest {
     @Autowired
     MockMvc mockMvc;
 
-    private static final List<Book> library = Arrays.asList(
-        new Book("Ulysses", "Ulysses chronicles", null, new Category("Myths")),
-        new Book("Don Quixote", "Retired country gentleman in his fifties", null, new Category("Legends")),
-        new Book("One Hundred Years of Solitude", "Widely beloved and acclaimed novel", null, new Category("Magic Realism")),
-        new Book("The Great Gatsby", "An era that Fitzgerald himself dubbed the.", null, new Category("Thriller"))
-    );
-
     @Test
     void shouldAddCategory() throws Exception {
         // given
         PostCategoryDto postCategory = new PostCategoryDto();
-        postCategory.setName("Horror");
+        String categoryName = "Horror" + UUID.randomUUID();
+        postCategory.setName(categoryName);
         // when, then
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/api/categories")
+                .header(HttpHeaders.AUTHORIZATION, buildHttpBasicAuthHeaderValue())
                 .content(asJsonString(postCategory))
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.id", hasLength(36)))
-            .andExpect(jsonPath("$.name", is("Horror")));
+            .andExpect(jsonPath("$.name", is(categoryName)));
     }
 
     @Test
@@ -74,6 +69,7 @@ class ControllerIntegrationTest {
         // when, then
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/api/authors")
+                .header(HttpHeaders.AUTHORIZATION, buildHttpBasicAuthHeaderValue())
                 .content(asJsonString(postAuthor))
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
@@ -95,6 +91,7 @@ class ControllerIntegrationTest {
         // when, then
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/api/books")
+                .header(HttpHeaders.AUTHORIZATION, buildHttpBasicAuthHeaderValue())
                 .content(asJsonString(postBook))
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
@@ -114,6 +111,7 @@ class ControllerIntegrationTest {
         postCategory.setName("Horror");
         MvcResult categoryResult = mockMvc.perform(MockMvcRequestBuilders
                 .post("/api/categories")
+                .header(HttpHeaders.AUTHORIZATION, buildHttpBasicAuthHeaderValue())
                 .content(asJsonString(postCategory))
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
@@ -127,6 +125,7 @@ class ControllerIntegrationTest {
         postAuthor.setSurname("Stoker");
         MvcResult authorResult = mockMvc.perform(MockMvcRequestBuilders
                 .post("/api/authors")
+                .header(HttpHeaders.AUTHORIZATION, buildHttpBasicAuthHeaderValue())
                 .content(asJsonString(postAuthor))
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
@@ -135,11 +134,15 @@ class ControllerIntegrationTest {
         return JsonPath.read(authorResult.getResponse().getContentAsString(), "$.id");
     }
 
-    private static String asJsonString(Object obj) {
+    private String asJsonString(Object obj) {
         try {
             return new ObjectMapper().writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    private String buildHttpBasicAuthHeaderValue() {
+        return "Basic " + Base64Utils.encodeToString("admin1:admin11".getBytes());
     }
 }

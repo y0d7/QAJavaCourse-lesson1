@@ -6,12 +6,19 @@ public enum Role {
 
     ADMIN(Set.of(
         Privilege.ACTUATOR,
-        Privilege.DELETE_ALL_CATEGORIES)),
+        Privilege.DELETE_ALL_CATEGORIES,
+        Privilege.DELETE_ALL_AUTHORS,
+        Privilege.DELETE_ALL_BOOKS)),
     MODERATOR(Set.of(
         Privilege.ADD_CATEGORY,
         Privilege.UPDATE_CATEGORY,
-        Privilege.DELETE_CATEGORY)
-    ),
+        Privilege.DELETE_CATEGORY,
+        Privilege.ADD_AUTHOR,
+        Privilege.UPDATE_AUTHOR,
+        Privilege.DELETE_AUTHOR,
+        Privilege.ADD_BOOK,
+        Privilege.UPDATE_BOOK,
+        Privilege.DELETE_BOOK)),
     CUSTOMER(Set.of(
         Privilege.READ_ALL_CATEGORIES,
         Privilege.READ_CATEGORY,
@@ -28,5 +35,9 @@ public enum Role {
 
     public Set<Privilege> getPrivileges() {
         return privileges;
+    }
+
+    public String getName() {
+        return "ROLE_" + name();
     }
 }

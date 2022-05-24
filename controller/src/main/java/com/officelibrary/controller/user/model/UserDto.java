@@ -8,11 +8,9 @@ import lombok.Setter;
 @Setter
 public class UserDto {
 
-    private String id;
     private String username;
 
     public UserDto(User user) {
-        this.id = user.getId();
         this.username = user.getUsername();
     }
 }

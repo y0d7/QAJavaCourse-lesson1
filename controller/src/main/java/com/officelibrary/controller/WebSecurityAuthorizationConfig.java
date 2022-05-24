@@ -14,6 +14,7 @@ public class WebSecurityAuthorizationConfig extends WebSecurityConfigurerAdapter
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
+            .csrf().disable()
             .authorizeRequests()
             .antMatchers(HttpMethod.GET, "/actuator/health").permitAll()
             .antMatchers(HttpMethod.GET, "/actuator/**").hasAuthority(Privilege.ACTUATOR.name())

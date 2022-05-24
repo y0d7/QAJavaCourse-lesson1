@@ -1,8 +1,5 @@
 package com.officelibrary.service;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -13,13 +10,28 @@ import com.officelibrary.persistence.repository.UserRepository;
 import com.officelibrary.service.exceptions.UserAlreadyExistsException;
 import com.officelibrary.service.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserPasswordHasher userPasswordHasher;
+
+    public void addAdmin() {
+        boolean adminAlreadyPresent = userRepository.findAll()
+            .stream()
+            .anyMatch(user -> user.getRoles().contains(Role.ADMIN));
+        if (adminAlreadyPresent) {
+            log.info("Admin user already exists in repository");
+        } else {
+            log.info("Adding admin to repository with default username and password");
+            addUser("admin1", "admin11", Set.of(Role.ADMIN, Role.MODERATOR, Role.CUSTOMER));
+        }
+    }
 
     public List<User> getAllModerators() {
         return userRepository.findAll()
@@ -56,7 +68,7 @@ public class UserService {
     }
 
     public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername();
+        return userRepository.findById(username);
     }
 
     private User addUser(String username, String password, Set<Role> roles) {
@@ -66,21 +78,9 @@ public class UserService {
         if (userAlreadyExisting) {
             throw new UserAlreadyExistsException();
         }
-        String hashedPassword = hashPassword(password);
+        String hashedPassword = userPasswordHasher.hash(password);
         User user = new User(username, roles, hashedPassword);
         userRepository.save(user);
         return user;
-    }
-
-    private String hashPassword(String password) {
-        byte[] passwordInBytes = password.getBytes(StandardCharsets.UTF_8);
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
-        }
-        byte[] hashedPassword = md.digest(passwordInBytes);
-        return new String(hashedPassword);
     }
 }

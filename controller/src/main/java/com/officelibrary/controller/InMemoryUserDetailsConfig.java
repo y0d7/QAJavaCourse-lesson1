@@ -3,7 +3,7 @@ package com.officelibrary.controller;
 import java.util.Set;
 
 import com.officelibrary.persistence.model.Role;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,29 +14,30 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
-@Configuration
-public class UserDetailsConfig {
+/**
+ * The configuration below should be used
+ * if you want to have predefined list of users stored in memory
+ * for the purposes of local testing
+ */
+//@Configuration
+@RequiredArgsConstructor
+public class InMemoryUserDetailsConfig {
 
     private final PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public UserDetailsConfig(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails admin = createUserDetails(
-            "myAdmin",
-            "password1",
+            "admin1",
+            "admin11",
             Set.of(Role.ADMIN, Role.MODERATOR, Role.CUSTOMER));
         UserDetails moderator = createUserDetails(
-            "myModerator",
-            "password2",
+            "moderator1",
+            "moderator11",
             Set.of(Role.MODERATOR, Role.CUSTOMER));
         UserDetails customer = createUserDetails(
-            "myCustomer",
-            "password3",
+            "customer1",
+            "customer11",
             Set.of(Role.CUSTOMER));
         return new InMemoryUserDetailsManager(admin, moderator, customer);
     }
