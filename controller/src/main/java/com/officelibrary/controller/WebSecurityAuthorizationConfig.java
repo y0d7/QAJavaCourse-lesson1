@@ -35,6 +35,12 @@ public class WebSecurityAuthorizationConfig extends WebSecurityConfigurerAdapter
             .antMatchers(HttpMethod.PUT, "/api/authors/{id}").hasAuthority(Privilege.UPDATE_AUTHOR.name())
             .anyRequest().authenticated()
             .and()
-            .httpBasic();
+            .httpBasic()
+            .and()
+            .formLogin()
+            .and()
+            .logout()
+            .logoutUrl("/logout")
+            .deleteCookies("JSESSIONID");
     }
 }
