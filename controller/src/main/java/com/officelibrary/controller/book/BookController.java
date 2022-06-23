@@ -1,7 +1,6 @@
 package com.officelibrary.controller.book;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -34,7 +33,7 @@ public class BookController {
         return bookService.getAll()
             .stream()
             .map(BookDto::new)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @GetMapping("/{id}")

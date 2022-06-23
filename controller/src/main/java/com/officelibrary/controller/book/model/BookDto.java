@@ -26,7 +26,7 @@ public class BookDto {
         this.authors = book.getAuthors()
             .stream()
             .map(AuthorDto::new)
-            .collect(Collectors.toList());
+            .toList();
         this.category = new CategoryDto(book.getCategory());
     }
 }

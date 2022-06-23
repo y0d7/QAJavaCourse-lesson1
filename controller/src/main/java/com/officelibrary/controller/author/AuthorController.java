@@ -1,7 +1,6 @@
 package com.officelibrary.controller.author;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -32,7 +31,7 @@ public class AuthorController {
         return authorService.getAll()
             .stream()
             .map(AuthorDto::new)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @GetMapping("{id}")
