@@ -1,0 +1,17 @@
+{
+  "appData": [
+    {
+      "id": "books",
+      "values": [
+        {
+          "id": "6cde0391-ff00-4ed1-a0d7-7126a613a079",
+          "bookname": "The world of React",
+          "author": "AP",
+          "price": "999",
+          "quantity": "1",
+          "date": "2022-05-18T18:10:25.099Z"
+        }
+      ]
+    }
+  ]
+}
